@@ -1,0 +1,30 @@
+{
+  "name": "abandoned_site_multiplayer",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/SPRsosso/Abandoned_Site_Multiplayer#readme",
+  "bugs": {
+    "url": "https://github.com/SPRsosso/Abandoned_Site_Multiplayer/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SPRsosso/Abandoned_Site_Multiplayer.git"
+  },
+  "license": "ISC",
+  "author": "sosso",
+  "type": "module",
+  "main": "./js/backend.js",
+  "scripts": {
+    "start": "tsc && electron ."
+  },
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "electron": "^35.0.1",
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/electron": "^1.4.38"
+  }
+}
