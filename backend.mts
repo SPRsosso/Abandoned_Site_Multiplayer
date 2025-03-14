@@ -14,12 +14,17 @@ const io = new Server(server);
 
 let win;
 
-server.listen(3000, () => {
-    console.log("Listening on port :3000");
+expressApp.get("/", ( req, res ) => {
+    res.sendFile(path.join(__dirname, "..", "index.html"));
+});
+
+server.listen(3000, "127.0.0.1", () => {
+    const address = server.address() as { port: number }
+    console.log("Listening on port: " + address.port);
 });
 
 io.on("connection", ( socket: Socket ) => {
-    console.log("User connected:", socket.id);
+    console.log("User connected with IP:", socket.handshake.address);
 });
 
 app.commandLine.appendSwitch('enable-autofill');
@@ -32,6 +37,7 @@ function createWindow() {
         fullscreen: true,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
+            nodeIntegration: true,
         }
     });
 
