@@ -14,7 +14,7 @@ export class Encoder {
         return key;
     }
 
-    encode(ip: string, key: string): string {
+    static encode(ip: string, key: string): string {
         let encoded = "";
         
         const split = ip.split(".");
@@ -29,17 +29,18 @@ export class Encoder {
                 const shiftedNumber = number + shift;
 
                 const multiple = Math.ceil(shiftedNumber / Encoder.chars.length);
-                encoded += Encoder.chars[Encoder.chars.length * multiple - number];
+                encoded += Encoder.chars[Encoder.chars.length - (Encoder.chars.length * multiple - shiftedNumber)];
 
                 currentIndex++;
             }
-            encoded += ".";
+            if (i < split.length - 1)
+                encoded += ".";
         }
         
         return encoded;
     }
 
-    decode(input: string, key: string) {
+    static decode(input: string, key: string) {
         let encoded = "";
         
         const split = input.split(".");
@@ -49,13 +50,23 @@ export class Encoder {
         for (let i = 0; i < split.length; i++) {
             const str = split[i];
             for (let j = 0; j < str.length; j++) {
-                
+                const shift = Encoder.chars.indexOf(key[currentIndex]) + 1;
+                const number = Encoder.chars.indexOf(str[j]);
+                const shiftedNumber = number - shift;
+
+                const multiple = Math.ceil(shiftedNumber / Encoder.chars.length);
+                encoded += Encoder.chars.length - (Encoder.chars.length * multiple - shiftedNumber);
 
                 currentIndex++;
             }
-            encoded += ".";
+            if (i < split.length - 1)
+                encoded += ".";
         }
         
         return encoded;
+    }
+
+    static removePrefix(ip: string) {
+        return ip.replace(/^::ffff:/, '').replace(/^::/, '');
     }
 }

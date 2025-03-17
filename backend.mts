@@ -4,7 +4,8 @@ import { createServer, get } from "http";
 import { Server, Socket } from "socket.io";
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
-import dns from "dns";
+
+import { Encoder } from "./backend/encoder.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,11 +21,22 @@ expressApp.get("/", (req, res) => {
     res.send("Server is running!");
 });
 
+const world = {
+    name: "",
+}
 const players: { [key: string]: any } = {};
 
 io.on("connection", ( socket: Socket ) => {
-    console.log("User connected with IP:", socket.handshake.address);
-    players[socket.handshake.address] = {};
+    const socketIP = Encoder.removePrefix(socket.handshake.address);
+
+    const testIP = "192.168.1.24";
+    console.log("Test IP: " + testIP + ", Key: " + world.name);
+    const encoded = Encoder.encode(testIP, world.name);
+    const decoded = Encoder.decode(encoded, world.name);
+    console.log(encoded + ",", decoded)
+
+    console.log("User connected with IP:", socketIP);
+    players[socketIP] = {};
 
     io.emit("players", players);
 });
@@ -50,6 +62,8 @@ function createWindow() {
     });
 
     ipcMain.handle("create-new-game", ( event: IpcMainInvokeEvent, name: string ) => {
+        world.name = name;
+
         server.listen(0, () => {
             const address = server.address() as { port: number }
             console.log("Listening on port: " + address.port);
