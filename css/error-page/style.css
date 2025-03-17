@@ -1,0 +1,22 @@
+:host {
+    width: 1000px;
+    height: fit-content;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+
+    padding: 20px 50px;
+}
+
+h1,
+.error {
+    color: var(--error-color);
+    font-style: italic;
+}
+
+.btn {
+    text-decoration: underline;
+    cursor: pointer;
+}

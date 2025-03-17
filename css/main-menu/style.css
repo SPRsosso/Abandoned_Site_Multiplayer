@@ -1,0 +1,33 @@
+:host {
+    width: 1000px;
+    height: fit-content;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+
+    padding: 20px 50px;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 48px;
+}
+
+.btn {
+    width: fit-content;
+    font-size: 32px;
+    cursor: pointer;
+
+    &.inactive {
+        color: var(--accent-color-faded);
+
+        cursor: default;
+    }
+
+    &:hover:not(.inactive) {
+        font-style: italic;
+    }
+}

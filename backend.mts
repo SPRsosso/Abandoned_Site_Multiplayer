@@ -1,30 +1,32 @@
-import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from "electron";
+import { app, BrowserWindow, ipcMain, IpcMainEvent, IpcMainInvokeEvent } from "electron";
 import express from "express";
-import { createServer } from "http";
+import { createServer, get } from "http";
 import { Server, Socket } from "socket.io";
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
+import dns from "dns";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const expressApp = express();
 const server = createServer(expressApp);
-const io = new Server(server);
+const io = new Server(server, {
+    transports: ["polling", "websocket"]
+});
+let win: BrowserWindow;
 
-let win;
-
-expressApp.get("/", ( req, res ) => {
-    res.sendFile(path.join(__dirname, "..", "index.html"));
+expressApp.get("/", (req, res) => {
+    res.send("Server is running!");
 });
 
-server.listen(3000, "127.0.0.1", () => {
-    const address = server.address() as { port: number }
-    console.log("Listening on port: " + address.port);
-});
+const players: { [key: string]: any } = {};
 
 io.on("connection", ( socket: Socket ) => {
     console.log("User connected with IP:", socket.handshake.address);
+    players[socket.handshake.address] = {};
+
+    io.emit("players", players);
 });
 
 app.commandLine.appendSwitch('enable-autofill');
@@ -32,9 +34,9 @@ app.commandLine.appendSwitch('enable-password-generation');
 
 function createWindow() {
     win = new BrowserWindow({
-        width: 800,
-        height: 600,
-        fullscreen: true,
+        width: 1200,
+        height: 700,
+        // fullscreen: true,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: true,
@@ -43,7 +45,31 @@ function createWindow() {
 
     win.loadFile("index.html");
 
-    ipcMain.handle("ping", () => "pong");
+    ipcMain.handle('close-app', function () {
+        app.quit();
+    });
+
+    ipcMain.handle("create-new-game", ( event: IpcMainInvokeEvent, name: string ) => {
+        server.listen(0, () => {
+            const address = server.address() as { port: number }
+            console.log("Listening on port: " + address.port);
+
+            win.webContents.send("send-port", address.port);
+        });
+    });
+
+    ipcMain.handle("check-server-existance", ( event: IpcMainInvokeEvent, url: string ) => {
+        const request = get(url, (response) => {
+            if (response.statusCode)
+                win.webContents.send("server-exists", (response.statusCode < 400));
+        });
+
+        request.on("error", (err: any) => {
+            win.webContents.send("server-exists", false);
+        });
+
+        request.end();
+    });
 }
 
 app.whenReady().then(() => {
